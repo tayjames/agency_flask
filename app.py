@@ -119,26 +119,24 @@ def delete_user(id):
     user = User.query.get(id)
     db.session.delete(user)
     db.session.commit()
-    # import ipdb; ipdb.set_trace()
     return user_schema.jsonify(user)
 
 # Create an Opportunity
-@app.route('/users/1/opportunity', methods=['POST'])
-# def create_opportunity():
-    user = User.query.get(id)
-    id = user.id
+@app.route('/users/<user_id>/opportunity', methods=['POST'])
+def create_opportunity(user_id):
     title = request.json['title']
     type = request.json['type']
     location = request.json['location']
     estimated_time = request.json['estimated_time']
     description = request.json['description']
+    user_id = request.json['user_id']
 
     new_opportunity = Opportunity(title, type, location, estimated_time, description, user_id)
 
     db.session.add(new_opportunity)
     db.session.commit()
 
-    return opportunity_schema.jasonify(new_opportunity)
+    return opportunity_schema.jsonify(new_opportunity)
 
 
 # run server

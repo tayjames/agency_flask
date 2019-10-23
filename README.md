@@ -9,6 +9,8 @@ pic here
 to pry: import ipdb; ipdb.set_trace()
 
 ### Running Locally
+pipenv install flask_migrate
+pipenv install alembic
 create the migration repository for microblog by running ```flask db init```
 migrate the db by running ```flask db migrate``` then ```flask db upgrade```. To reverse any migrations, use ``` flask db downgrade```.
 
