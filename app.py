@@ -147,8 +147,9 @@ def create_opportunity(user_id):
 
 # Get all opportunities for one user
 @app.route('/users/<user_id>/opportunities', methods=['GET'])
-def get_opportunities():
-    all_opportunities = Opportunity.query.all()
+def get_opportunities(user_id):
+    user = User.query.get(user_id)
+    all_opportunities = user.opportunities
     result = opportunities_schema.dump(all_opportunities)
     return jsonify(result)
 
