@@ -1,8 +1,10 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
+from flask_migrate import Migrate
 from datetime import datetime
 import os
+import bcrypt
 
 # init app
 app = Flask(__name__)
@@ -12,6 +14,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'db
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # init db
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 # init marshmallow
 ma = Marshmallow(app)
 
@@ -21,13 +24,15 @@ class User(db.Model):
     first_name = db.Column(db.String(100))
     last_name = db.Column(db.String(100))
     email = db.Column(db.String(100), unique=True)
+    password = db.Column(db.String(100))
     phone_number= db.Column(db.Integer)
     opportunities = db.relationship('Opportunity', backref='client')
 
-    def __init__(self, first_name, last_name, email, phone_number):
+    def __init__(self, first_name, last_name, email, password, phone_number):
         self.first_name = first_name
         self.last_name = last_name
         self.email = email
+        self.password = password
         self.phone_number = phone_number
 
 class Opportunity(db.Model):
@@ -51,7 +56,7 @@ class Opportunity(db.Model):
 # USER Schemas
 class UserSchema(ma.Schema):
     class Meta:
-        fields = ('id', 'first_name', 'last_name', 'email', 'phone_number')
+        fields = ('id', 'first_name', 'last_name', 'email', 'password', 'phone_number')
 
 # OPPORTUNITY Schemas
 class OpportunitySchema(ma.Schema):
@@ -70,9 +75,12 @@ def create_user():
     first_name = request.json['first_name']
     last_name = request.json['last_name']
     email = request.json['email']
+    # import ipdb; ipdb.set_trace()
+
+    password = bcrypt.hashpw(request.json['password'].encode('utf8'), bcrypt.gensalt())
     phone_number = request.json['phone_number']
 
-    new_user = User(first_name, last_name, email, phone_number)
+    new_user = User(first_name, last_name, email, password, phone_number)
 
     db.session.add(new_user)
     db.session.commit()
@@ -84,7 +92,6 @@ def create_user():
 def get_users():
     all_users = User.query.all()
     result = users_schema.dump(all_users)
-    # import ipdb; ipdb.set_trace()
     return jsonify(result)
 
 # Get single user
