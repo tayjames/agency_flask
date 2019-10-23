@@ -40,6 +40,14 @@ class Opportunity(db.Model):
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
+    def __init__(self, title, type, location, estimated_time, description, user_id):
+        self.title = title
+        self.type = type
+        self.location = location
+        self.estimated_time = estimated_time
+        self.description = description
+        self.user_id = user_id
+
 # USER Schema
 class UserSchema(ma.Schema):
     class Meta:
