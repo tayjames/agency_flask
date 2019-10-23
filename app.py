@@ -160,6 +160,27 @@ def get_opportunity(user_id, id):
     opportunity = Opportunity.query.get(id)
     return opportunity_schema.jsonify(opportunity)
 
+# Update a users opportunity
+@app.route('/users/<user_id>/opportunity', methods=['PUT'])
+def update_opporutnity(user_id):
+    title = request.json['title']
+    type = request.json['type']
+    location = request.json['location']
+    estimated_time = request.json['estimated_time']
+    description = request.json['description']
+    user_id = request.json['user_id']
+
+    opportunity.title = title
+    opportunity.type = type
+    opportunity.location = location
+    opportunity.estimated_time = estimated_time
+    opportunity.description = description
+    opportunity.user_id = user_id
+
+    db.session.commit()
+
+    return opportunity_schema.jsonify(opportunity)
+
 
 # run server
 if __name__ == '__main__':
