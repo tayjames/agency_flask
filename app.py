@@ -45,15 +45,29 @@ class Opportunity(db.Model):
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
-# USER Schema
+    def __init__(self, title, type, location, estimated_time, description, user_id):
+        self.title = title
+        self.type = type
+        self.location = location
+        self.estimated_time = estimated_time
+        self.description = description
+        self.user_id = user_id
+
+# USER Schemas
 class UserSchema(ma.Schema):
     class Meta:
         fields = ('id', 'first_name', 'last_name', 'email', 'password', 'phone_number')
 
+# OPPORTUNITY Schemas
+class OpportunitySchema(ma.Schema):
+    class Meta:
+        fields = ('id', 'title', 'type', 'location', 'estimated_time', 'description', 'user_id')
+
 # Init Schema
 user_schema = UserSchema()
 users_schema = UserSchema(many=True)
-
+opportunity_schema = OpportunitySchema()
+opportunities_schema = OpportunitySchema(many=True)
 
 #create a User
 @app.route('/user', methods=['POST'])
@@ -74,21 +88,21 @@ def create_user():
     return user_schema.jsonify(new_user)
 
 # Get all users
-@app.route('/user', methods=['GET'])
+@app.route('/users', methods=['GET'])
 def get_users():
     all_users = User.query.all()
     result = users_schema.dump(all_users)
     return jsonify(result)
 
 # Get single user
-@app.route('/user/<id>', methods=['GET'])
+@app.route('/users/<id>', methods=['GET'])
 def get_user(id):
     user = User.query.get(id)
     # import ipdb; ipdb.set_trace()
     return user_schema.jsonify(user)
 
 # Update a user
-@app.route('/user/<id>', methods=['PUT'])
+@app.route('/users/<id>', methods=['PUT'])
 def update_user(id):
     user = User.query.get(id)
 
@@ -107,13 +121,30 @@ def update_user(id):
     return user_schema.jsonify(user)
 
 # Delete single user
-@app.route('/user/<id>', methods=['DELETE'])
+@app.route('/users/<id>', methods=['DELETE'])
 def delete_user(id):
     user = User.query.get(id)
     db.session.delete(user)
     db.session.commit()
-    # import ipdb; ipdb.set_trace()
     return user_schema.jsonify(user)
+
+# Create an Opportunity
+@app.route('/users/<user_id>/opportunity', methods=['POST'])
+def create_opportunity(user_id):
+    title = request.json['title']
+    type = request.json['type']
+    location = request.json['location']
+    estimated_time = request.json['estimated_time']
+    description = request.json['description']
+    user_id = request.json['user_id']
+
+    new_opportunity = Opportunity(title, type, location, estimated_time, description, user_id)
+
+    db.session.add(new_opportunity)
+    db.session.commit()
+
+    return opportunity_schema.jsonify(new_opportunity)
+
 
 # run server
 if __name__ == '__main__':
