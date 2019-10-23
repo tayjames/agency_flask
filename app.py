@@ -48,15 +48,21 @@ class Opportunity(db.Model):
         self.description = description
         self.user_id = user_id
 
-# USER Schema
+# USER Schemas
 class UserSchema(ma.Schema):
     class Meta:
         fields = ('id', 'first_name', 'last_name', 'email', 'phone_number')
 
+# OPPORTUNITY Schemas
+class OpportunitySchema(ma.Schema):
+    class Meta:
+        fields = ('id', 'title', 'type', 'location', 'estimated_time', 'description', 'user_id')
+
 # Init Schema
 user_schema = UserSchema()
 users_schema = UserSchema(many=True)
-
+opportunity_schema = OpportunitySchema()
+opportunities_schema = OpportunitySchema(many=True)
 
 #create a User
 @app.route('/user', methods=['POST'])
