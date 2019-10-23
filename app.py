@@ -153,12 +153,12 @@ def get_opportunities(user_id):
     result = opportunities_schema.dump(all_opportunities)
     return jsonify(result)
 
-# # Get single opportunity for one user
-# @app.route('/users/<user_id>/opportunity/<id>', methods=['GET'])
-# def get_user(id):
-#     user = User.query.get(id)
-#     # import ipdb; ipdb.set_trace()
-#     return user_schema.jsonify(user)
+# Get single opportunity for one user
+@app.route('/users/<user_id>/opportunity/<id>', methods=['GET'])
+def get_opportunity(user_id, id):
+    user = User.query.get(user_id)
+    opportunity = Opportunity.query.get(id)
+    return opportunity_schema.jsonify(opportunity)
 
 
 # run server
