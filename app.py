@@ -145,6 +145,21 @@ def create_opportunity(user_id):
 
     return opportunity_schema.jsonify(new_opportunity)
 
+# Get all opportunities for one user
+@app.route('/users/<user_id>/opportunities', methods=['GET'])
+def get_opportunities(user_id):
+    user = User.query.get(user_id)
+    all_opportunities = user.opportunities
+    result = opportunities_schema.dump(all_opportunities)
+    return jsonify(result)
+
+# Get single opportunity for one user
+@app.route('/users/<user_id>/opportunity/<id>', methods=['GET'])
+def get_opportunity(user_id, id):
+    user = User.query.get(user_id)
+    opportunity = Opportunity.query.get(id)
+    return opportunity_schema.jsonify(opportunity)
+
 
 # run server
 if __name__ == '__main__':
