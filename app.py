@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from flask_migrate import Migrate
 from datetime import datetime
+from errors import bad_request
 import os
 import bcrypt
 
@@ -72,6 +73,11 @@ opportunities_schema = OpportunitySchema(many=True)
 #create a User
 @app.route('/user', methods=['POST'])
 def create_user():
+    data = request.get_json()
+    # import ipdb; ipdb.set_trace()
+    if 'first_name' not in data or 'last_name' not in data or 'email' not in data or 'password' not in data or 'phone_number' not in data:
+        return bad_request('Error: Missing Fields')
+
     first_name = request.json['first_name']
     last_name = request.json['last_name']
     email = request.json['email']
@@ -82,11 +88,9 @@ def create_user():
 
     db.session.add(new_user)
     db.session.commit()
-    # if response.status_code == 201
-    #     print("User Created")
-    # elif
-    #     print("Not sure what it's doing....")
+
     return user_schema.jsonify(new_user), 201
+
 
 # Get all users
 @app.route('/users', methods=['GET'])
