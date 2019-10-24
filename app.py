@@ -76,7 +76,9 @@ def create_user():
     data = request.get_json()
     # import ipdb; ipdb.set_trace()
     if 'first_name' not in data or 'last_name' not in data or 'email' not in data or 'password' not in data or 'phone_number' not in data:
-        return bad_request('Error: Missing Fields')
+        return bad_request(204, 'Error: Missing Fields')
+    if User.query.filter_by(email=data['email']).first():
+        return bad_request('That email is in use, please pick another.')
 
     first_name = request.json['first_name']
     last_name = request.json['last_name']
@@ -97,6 +99,7 @@ def create_user():
 def get_users():
     all_users = User.query.all()
     result = users_schema.dump(all_users)
+    # return bad_request(400, 'Oops, there was an error')
     return jsonify(result), 200
 
 # Get single user
@@ -127,20 +130,25 @@ def update_user(id):
 # Delete single user
 @app.route('/users/<id>', methods=['DELETE'])
 def delete_user(id):
+
     user = User.query.get(id)
     db.session.delete(user)
     db.session.commit()
-    return user_schema.jsonify(user), 204
+    all_users = User.query.all()
+    return users_schema.jsonify(all_users), 204
 
 # Create an Opportunity
 @app.route('/users/<user_id>/opportunity', methods=['POST'])
 def create_opportunity(user_id):
+    data = request.get_json()
+    if 'title' not in data or 'location' not in data or 'type' not in data or 'description' not in data or 'estimated_time' not in data:
+        return bad_request('Error: Missing Fields')
+
     title = request.json['title']
     type = request.json['type']
     location = request.json['location']
     estimated_time = request.json['estimated_time']
     description = request.json['description']
-    # user_id = request.json['user_id']
 
     new_opportunity = Opportunity(title, type, location, estimated_time, description, user_id)
 
@@ -193,7 +201,7 @@ def delete_opportunity(user_id, id):
     opportunity = Opportunity.query.get(id)
     db.session.delete(opportunity)
     db.session.commit()
-    return opportunity_schema.jsonify(opportunity), 204
+    return opportunities_schema.jsonify(opportunities), 204
 
 
 # run server
