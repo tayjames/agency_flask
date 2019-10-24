@@ -75,8 +75,6 @@ def create_user():
     first_name = request.json['first_name']
     last_name = request.json['last_name']
     email = request.json['email']
-    # import ipdb; ipdb.set_trace()
-
     password = bcrypt.hashpw(request.json['password'].encode('utf8'), bcrypt.gensalt())
     phone_number = request.json['phone_number']
 
@@ -84,21 +82,24 @@ def create_user():
 
     db.session.add(new_user)
     db.session.commit()
-
-    return user_schema.jsonify(new_user)
+    # if response.status_code == 201
+    #     print("User Created")
+    # elif
+    #     print("Not sure what it's doing....")
+    return user_schema.jsonify(new_user), 201
 
 # Get all users
 @app.route('/users', methods=['GET'])
 def get_users():
     all_users = User.query.all()
     result = users_schema.dump(all_users)
-    return jsonify(result)
+    return jsonify(result), 200
 
 # Get single user
 @app.route('/users/<id>', methods=['GET'])
 def get_user(id):
     user = User.query.get(id)
-    return user_schema.jsonify(user)
+    return user_schema.jsonify(user), 200
 
 # Update a user
 @app.route('/users/<id>', methods=['PUT'])
@@ -117,7 +118,7 @@ def update_user(id):
 
     db.session.commit()
 
-    return user_schema.jsonify(user)
+    return user_schema.jsonify(user), 200
 
 # Delete single user
 @app.route('/users/<id>', methods=['DELETE'])
@@ -125,7 +126,7 @@ def delete_user(id):
     user = User.query.get(id)
     db.session.delete(user)
     db.session.commit()
-    return user_schema.jsonify(user)
+    return user_schema.jsonify(user), 204
 
 # Create an Opportunity
 @app.route('/users/<user_id>/opportunity', methods=['POST'])
@@ -142,7 +143,7 @@ def create_opportunity(user_id):
     db.session.add(new_opportunity)
     db.session.commit()
 
-    return opportunity_schema.jsonify(new_opportunity)
+    return opportunity_schema.jsonify(new_opportunity), 201
 
 # Get all opportunities for one user
 @app.route('/users/<user_id>/opportunities', methods=['GET'])
@@ -150,14 +151,14 @@ def get_opportunities(user_id):
     user = User.query.get(user_id)
     all_opportunities = user.opportunities
     result = opportunities_schema.dump(all_opportunities)
-    return jsonify(result)
+    return jsonify(result), 200
 
 # Get single opportunity for one user
 @app.route('/users/<user_id>/opportunity/<id>', methods=['GET'])
 def get_opportunity(user_id, id):
     user = User.query.get(user_id)
     opportunity = Opportunity.query.get(id)
-    return opportunity_schema.jsonify(opportunity)
+    return opportunity_schema.jsonify(opportunity), 200
 
 # Update a users opportunity
 @app.route('/users/<user_id>/opportunity/<id>', methods=['PUT'])
@@ -179,7 +180,7 @@ def update_opporutnity(user_id, id):
 
     db.session.commit()
 
-    return opportunity_schema.jsonify(opportunity)
+    return opportunity_schema.jsonify(opportunity), 200
 
 #Delete opportunity for user
 @app.route('/users/<user_id>/opportunity/<id>', methods=['DELETE'])
@@ -188,7 +189,7 @@ def delete_opportunity(user_id, id):
     opportunity = Opportunity.query.get(id)
     db.session.delete(opportunity)
     db.session.commit()
-    return opportunity_schema.jsonify(opportunity)
+    return opportunity_schema.jsonify(opportunity), 204
 
 
 # run server
