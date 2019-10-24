@@ -98,7 +98,6 @@ def get_users():
 @app.route('/users/<id>', methods=['GET'])
 def get_user(id):
     user = User.query.get(id)
-    # import ipdb; ipdb.set_trace()
     return user_schema.jsonify(user)
 
 # Update a user
@@ -136,7 +135,7 @@ def create_opportunity(user_id):
     location = request.json['location']
     estimated_time = request.json['estimated_time']
     description = request.json['description']
-    user_id = request.json['user_id']
+    # user_id = request.json['user_id']
 
     new_opportunity = Opportunity(title, type, location, estimated_time, description, user_id)
 
@@ -180,6 +179,15 @@ def update_opporutnity(user_id, id):
 
     db.session.commit()
 
+    return opportunity_schema.jsonify(opportunity)
+
+#Delete opportunity for user
+@app.route('/users/<user_id>/opportunity/<id>', methods=['DELETE'])
+def delete_opportunity(user_id, id):
+    user = User.query.get(user_id)
+    opportunity = Opportunity.query.get(id)
+    db.session.delete(opportunity)
+    db.session.commit()
     return opportunity_schema.jsonify(opportunity)
 
 
