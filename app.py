@@ -74,9 +74,8 @@ opportunities_schema = OpportunitySchema(many=True)
 @app.route('/user', methods=['POST'])
 def create_user():
     data = request.get_json()
-    # import ipdb; ipdb.set_trace()
     if 'first_name' not in data or 'last_name' not in data or 'email' not in data or 'password' not in data or 'phone_number' not in data:
-        return bad_request(204, 'Error: Missing Fields')
+        return bad_request('Error: Missing Fields')
     if User.query.filter_by(email=data['email']).first():
         return bad_request('That email is in use, please pick another.')
 
