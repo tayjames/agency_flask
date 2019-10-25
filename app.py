@@ -2,13 +2,20 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from flask_migrate import Migrate
+from flask_cors import CORS
 from datetime import datetime
 from errors import bad_request
 import os
 import bcrypt
+import logging
+import json 
 
 # init app
 app = Flask(__name__)
+# app.config['CORS_HEADERS'] ='Content-Type'
+# logging.getLogger('flask_cors').level = logging.DEBUG
+# CORS(app)
+CORS(app, resources=r'*', headers='Content-Type')
 basedir = os.path.abspath(os.path.dirname(__file__))
 # database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'db.sqlite')
@@ -73,17 +80,24 @@ opportunities_schema = OpportunitySchema(many=True)
 #create a User
 @app.route('/user', methods=['POST'])
 def create_user():
-    data = request.get_json()
-    if 'first_name' not in data or 'last_name' not in data or 'email' not in data or 'password' not in data or 'phone_number' not in data:
-        return bad_request('Error: Missing Fields')
-    if User.query.filter_by(email=data['email']).first():
-        return bad_request('That email is in use, please pick another.')
+    # import ipdb; ipdb.set_trace()
 
-    first_name = request.json['first_name']
-    last_name = request.json['last_name']
-    email = request.json['email']
-    password = bcrypt.hashpw(request.json['password'].encode('utf8'), bcrypt.gensalt())
-    phone_number = request.json['phone_number']
+    
+    data = request.data
+    json_formatted_data = json.loads(data)
+    # import ipdb; ipdb.set_trace()
+
+    if 'first_name' not in json_formatted_data or 'last_name' not in json_formatted_data or 'email' not in json_formatted_data or 'password' not in json_formatted_data or 'phone_number' not in json_formatted_data:
+        return bad_request('Error: Missing Fields')
+    if User.query.filter_by(email=json_formatted_data['email']).first():
+        return bad_request('That email is in use, please pick another.')
+    # import ipdb; ipdb.set_trace()
+# 
+    first_name = json_formatted_data['first_name']
+    last_name = json_formatted_data['last_name']
+    email = json_formatted_data['email']
+    password = bcrypt.hashpw(json_formatted_data['password'].encode('utf8'), bcrypt.gensalt())
+    phone_number = json_formatted_data['phone_number']
 
     new_user = User(first_name, last_name, email, password, phone_number)
 
@@ -157,12 +171,12 @@ def create_opportunity(user_id):
     return opportunity_schema.jsonify(new_opportunity), 201
 
 # Get all opportunities for one user
-@app.route('/users/<user_id>/opportunities', methods=['GET'])
-def get_opportunities(user_id):
-    user = User.query.get(user_id)
-    all_opportunities = user.opportunities
-    result = opportunities_schema.dump(all_opportunities)
-    return jsonify(result), 200
+# @app.route( '/users/<user_id>/opportunities>', methods=['GET'])
+# def get_opportunities(user_id):
+#     user = User.query.get(user_id)
+#     all_opportunities = user.opportunities
+#     result = opportunities_schema.dump(all_opportunities)
+#     return jsonify(result), 200
 
 # Get single opportunity for one user
 @app.route('/users/<user_id>/opportunity/<id>', methods=['GET'])
