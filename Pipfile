@@ -13,6 +13,7 @@ marshmallow-sqlalchemy = "*"
 bcrypt = "*"
 flask-migrate = "*"
 alembic = "*"
+flask-script = "*"
 
 [requires]
 python_version = "3.8"

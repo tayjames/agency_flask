@@ -1,7 +1,7 @@
 # Agency
 
 Agency was a 4 person, 10 day project built to.....(TEXT COMING SOON!)
-
+https://git.heroku.com/the-agency-app.git
 ### Schema
 pic here
 
@@ -13,7 +13,7 @@ pipenv install flask_migrate
 pipenv install alembic
 create the migration repository for microblog by running ```flask db init```
 migrate the db by running ```flask db migrate``` then ```flask db upgrade```. To reverse any migrations, use ``` flask db downgrade```.
-
+heroku run python manage.py migrate
 >> python
 >> from app import db
 >> db.create_all()
