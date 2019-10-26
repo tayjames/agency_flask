@@ -12,14 +12,13 @@ import json
 
 # init app
 app = Flask(__name__)
-# app.config['CORS_HEADERS'] ='Content-Type'
-# logging.getLogger('flask_cors').level = logging.DEBUG
-# CORS(app)
 CORS(app, resources=r'*', headers='Content-Type')
 basedir = os.path.abspath(os.path.dirname(__file__))
+
 # database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'db.sqlite')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 # init db
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
@@ -80,19 +79,14 @@ opportunities_schema = OpportunitySchema(many=True)
 #create a User
 @app.route('/user', methods=['POST'])
 def create_user():
-    # import ipdb; ipdb.set_trace()
-
-    
     data = request.data
     json_formatted_data = json.loads(data)
-    # import ipdb; ipdb.set_trace()
-
+  
     if 'first_name' not in json_formatted_data or 'last_name' not in json_formatted_data or 'email' not in json_formatted_data or 'password' not in json_formatted_data or 'phone_number' not in json_formatted_data:
         return bad_request('Error: Missing Fields')
     if User.query.filter_by(email=json_formatted_data['email']).first():
         return bad_request('That email is in use, please pick another.')
-    # import ipdb; ipdb.set_trace()
-# 
+    
     first_name = json_formatted_data['first_name']
     last_name = json_formatted_data['last_name']
     email = json_formatted_data['email']
@@ -112,7 +106,6 @@ def create_user():
 def get_users():
     all_users = User.query.all()
     result = users_schema.dump(all_users)
-    # return bad_request(400, 'Oops, there was an error')
     return jsonify(result), 200
 
 # Get single user
