@@ -2,26 +2,63 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from flask_migrate import Migrate
+from flask_cors import CORS
 from datetime import datetime
 from errors import bad_request
 import os
 import bcrypt
-import psycopg2
-from models import User, Opportunity
+import logging
+import json
 
 # init app
 app = Flask(__name__)
+CORS(app, resources=r'*', headers='Content-Type')
 basedir = os.path.abspath(os.path.dirname(__file__))
+
 # database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'db.sqlite')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 # init db
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 # init marshmallow
 ma = Marshmallow(app)
 
+# User Class/model
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    first_name = db.Column(db.String(100))
+    last_name = db.Column(db.String(100))
+    email = db.Column(db.String(100), unique=True)
+    password = db.Column(db.String(100))
+    phone_number= db.Column(db.Integer)
+    opportunities = db.relationship('Opportunity', backref='client')
 
+    def __init__(self, first_name, last_name, email, password, phone_number):
+        self.first_name = first_name
+        self.last_name = last_name
+        self.email = email
+        self.password = password
+        self.phone_number = phone_number
+
+class Opportunity(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(120))
+    type = db.Column(db.String(120), index=True)
+    location = db.Column(db.String(120), index=True)
+    estimated_time = db.Column(db.String(120), index=True)
+    description = db.Column(db.String(140), index=True)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+
+    def __init__(self, title, type, location, estimated_time, description, user_id):
+        self.title = title
+        self.type = type
+        self.location = location
+        self.estimated_time = estimated_time
+        self.description = description
+        self.user_id = user_id
 
 # USER Schemas
 class UserSchema(ma.Schema):
@@ -42,17 +79,19 @@ opportunities_schema = OpportunitySchema(many=True)
 #create a User
 @app.route('/user', methods=['POST'])
 def create_user():
-    data = request.get_json()
-    if 'first_name' not in data or 'last_name' not in data or 'email' not in data or 'password' not in data or 'phone_number' not in data:
+    data = request.data
+    json_formatted_data = json.loads(data)
+
+    if 'first_name' not in json_formatted_data or 'last_name' not in json_formatted_data or 'email' not in json_formatted_data or 'password' not in json_formatted_data or 'phone_number' not in json_formatted_data:
         return bad_request('Error: Missing Fields')
-    if User.query.filter_by(email=data['email']).first():
+    if User.query.filter_by(email=json_formatted_data['email']).first():
         return bad_request('That email is in use, please pick another.')
 
-    first_name = request.json['first_name']
-    last_name = request.json['last_name']
-    email = request.json['email']
-    password = bcrypt.hashpw(request.json['password'].encode('utf8'), bcrypt.gensalt())
-    phone_number = request.json['phone_number']
+    first_name = json_formatted_data['first_name']
+    last_name = json_formatted_data['last_name']
+    email = json_formatted_data['email']
+    password = bcrypt.hashpw(json_formatted_data['password'].encode('utf8'), bcrypt.gensalt())
+    phone_number = json_formatted_data['phone_number']
 
     new_user = User(first_name, last_name, email, password, phone_number)
 
@@ -67,7 +106,6 @@ def create_user():
 def get_users():
     all_users = User.query.all()
     result = users_schema.dump(all_users)
-    # return bad_request(400, 'Oops, there was an error')
     return jsonify(result), 200
 
 # Get single user
@@ -108,8 +146,10 @@ def delete_user(id):
 # Create an Opportunity
 @app.route('/users/<user_id>/opportunity', methods=['POST'])
 def create_opportunity(user_id):
-    data = request.get_json()
-    if 'title' not in data or 'location' not in data or 'type' not in data or 'description' not in data or 'estimated_time' not in data:
+    data = request.data
+    json_formatted_data = json.loads(data)
+
+    if 'title' not in json_formatted_data or 'location' not in json_formatted_data or 'type' not in json_formatted_data or 'description' not in json_formatted_data or 'estimated_time' not in json_formatted_data:
         return bad_request('Error: Missing Fields')
 
     title = request.json['title']
@@ -125,13 +165,20 @@ def create_opportunity(user_id):
 
     return opportunity_schema.jsonify(new_opportunity), 201
 
-# Get all opportunities for one user
-@app.route('/users/<user_id>/opportunities', methods=['GET'])
-def get_opportunities(user_id):
-    user = User.query.get(user_id)
-    all_opportunities = user.opportunities
+#Get all opportunities
+@app.route('/opportunities', methods=['GET'])
+def get_all_opportunities():
+    all_opportunities = Opportunity.query.all()
     result = opportunities_schema.dump(all_opportunities)
     return jsonify(result), 200
+
+# Get all opportunities for one user
+# @app.route( '/users/<user_id>/opportunities>', methods=['GET'])
+# def get_opportunities(user_id):
+#     user = User.query.get(user_id)
+#     all_opportunities = user.opportunities
+#     result = opportunities_schema.dump(all_opportunities)
+#     return jsonify(result), 200
 
 # Get single opportunity for one user
 @app.route('/users/<user_id>/opportunity/<id>', methods=['GET'])
