@@ -25,12 +25,47 @@ migrate = Migrate(app, db)
 # init marshmallow
 ma = Marshmallow(app)
 
+# User Class/model
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    first_name = db.Column(db.String(100))
+    last_name = db.Column(db.String(100))
+    email = db.Column(db.String(100), unique=True)
+    password = db.Column(db.String(100))
+    phone_number= db.Column(db.Integer)
+    role = db.Column(db.String(100))
+    opportunities = db.relationship('Opportunity', backref='client')
 
+    def __init__(self, first_name, last_name, email, password, phone_number, role):
+        self.first_name = first_name
+        self.last_name = last_name
+        self.email = email
+        self.password = password
+        self.phone_number = phone_number
+        self.role = role
+
+class Opportunity(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(120))
+    type = db.Column(db.String(120), index=True)
+    location = db.Column(db.String(120), index=True)
+    estimated_time = db.Column(db.String(120), index=True)
+    description = db.Column(db.String(140), index=True)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+
+    def __init__(self, title, type, location, estimated_time, description, user_id):
+        self.title = title
+        self.type = type
+        self.location = location
+        self.estimated_time = estimated_time
+        self.description = description
+        self.user_id = user_id
 
 # USER Schemas
 class UserSchema(ma.Schema):
     class Meta:
-        fields = ('id', 'first_name', 'last_name', 'email', 'password', 'phone_number')
+        fields = ('id', 'first_name', 'last_name', 'email', 'password', 'phone_number', 'role')
 
 # OPPORTUNITY Schemas
 class OpportunitySchema(ma.Schema):
@@ -49,7 +84,7 @@ def create_user():
     data = request.data
     json_formatted_data = json.loads(data)
 
-    if 'first_name' not in json_formatted_data or 'last_name' not in json_formatted_data or 'email' not in json_formatted_data or 'password' not in json_formatted_data or 'phone_number' not in json_formatted_data:
+    if 'first_name' not in json_formatted_data or 'last_name' not in json_formatted_data or 'email' not in json_formatted_data or 'password' not in json_formatted_data or 'phone_number' not in json_formatted_data or 'role' not in json_formatted_data:
         return bad_request('Error: Missing Fields')
     if User.query.filter_by(email=json_formatted_data['email']).first():
         return bad_request('That email is in use, please pick another.')
@@ -59,8 +94,9 @@ def create_user():
     email = json_formatted_data['email']
     password = bcrypt.hashpw(json_formatted_data['password'].encode('utf8'), bcrypt.gensalt())
     phone_number = json_formatted_data['phone_number']
+    role = json_formatted_data['role']
 
-    new_user = User(first_name, last_name, email, password, phone_number)
+    new_user = User(first_name, last_name, email, password, phone_number, role)
 
     db.session.add(new_user)
     db.session.commit()
