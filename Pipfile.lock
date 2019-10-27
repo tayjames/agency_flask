@@ -155,6 +155,13 @@
             "index": "pypi",
             "version": "==2.5.2"
         },
+        "flask-script": {
+            "hashes": [
+                "sha256:6425963d91054cfcc185807141c7314a9c5ad46325911bd24dcb489bd0161c65"
+            ],
+            "index": "pypi",
+            "version": "==2.0.6"
+        },
         "flask-sqlalchemy": {
             "hashes": [
                 "sha256:0078d8663330dc05a74bc72b3b6ddc441b9a744e2f56fe60af1a5bfc81334327",
@@ -299,6 +306,7 @@
         },
         "pycparser": {
             "hashes": [
+                "sha256:352887641cdfe89a61b6105b24cb37b10b4585e11b2f3a89a73ee062a86b2b51",
                 "sha256:a988718abfad80b6b157acce7bf130a30876d27603738ac39f140993246b25b3"
             ],
             "version": "==2.19"
