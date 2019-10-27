@@ -2,16 +2,23 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from flask_migrate import Migrate
+from flask_cors import CORS
 from datetime import datetime
+from errors import bad_request
 import os
 import bcrypt
+import logging
+import json
 
 # init app
 app = Flask(__name__)
+CORS(app, resources=r'*', headers='Content-Type')
 basedir = os.path.abspath(os.path.dirname(__file__))
+
 # database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'db.sqlite')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 # init db
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
@@ -72,34 +79,40 @@ opportunities_schema = OpportunitySchema(many=True)
 #create a User
 @app.route('/user', methods=['POST'])
 def create_user():
-    first_name = request.json['first_name']
-    last_name = request.json['last_name']
-    email = request.json['email']
-    # import ipdb; ipdb.set_trace()
+    data = request.data
+    json_formatted_data = json.loads(data)
 
-    password = bcrypt.hashpw(request.json['password'].encode('utf8'), bcrypt.gensalt())
-    phone_number = request.json['phone_number']
+    if 'first_name' not in json_formatted_data or 'last_name' not in json_formatted_data or 'email' not in json_formatted_data or 'password' not in json_formatted_data or 'phone_number' not in json_formatted_data:
+        return bad_request('Error: Missing Fields')
+    if User.query.filter_by(email=json_formatted_data['email']).first():
+        return bad_request('That email is in use, please pick another.')
+
+    first_name = json_formatted_data['first_name']
+    last_name = json_formatted_data['last_name']
+    email = json_formatted_data['email']
+    password = bcrypt.hashpw(json_formatted_data['password'].encode('utf8'), bcrypt.gensalt())
+    phone_number = json_formatted_data['phone_number']
 
     new_user = User(first_name, last_name, email, password, phone_number)
 
     db.session.add(new_user)
     db.session.commit()
 
-    return user_schema.jsonify(new_user)
+    return user_schema.jsonify(new_user), 201
+
 
 # Get all users
 @app.route('/users', methods=['GET'])
 def get_users():
     all_users = User.query.all()
     result = users_schema.dump(all_users)
-    return jsonify(result)
+    return jsonify(result), 200
 
 # Get single user
 @app.route('/users/<id>', methods=['GET'])
 def get_user(id):
     user = User.query.get(id)
-    # import ipdb; ipdb.set_trace()
-    return user_schema.jsonify(user)
+    return user_schema.jsonify(user), 200
 
 # Update a user
 @app.route('/users/<id>', methods=['PUT'])
@@ -118,32 +131,92 @@ def update_user(id):
 
     db.session.commit()
 
-    return user_schema.jsonify(user)
+    return user_schema.jsonify(user), 200
 
 # Delete single user
 @app.route('/users/<id>', methods=['DELETE'])
 def delete_user(id):
+
     user = User.query.get(id)
     db.session.delete(user)
     db.session.commit()
-    return user_schema.jsonify(user)
+    all_users = User.query.all()
+    return users_schema.jsonify(all_users), 204
 
 # Create an Opportunity
 @app.route('/users/<user_id>/opportunity', methods=['POST'])
 def create_opportunity(user_id):
+    data = request.data
+    json_formatted_data = json.loads(data)
+
+    if 'title' not in json_formatted_data or 'location' not in json_formatted_data or 'type' not in json_formatted_data or 'description' not in json_formatted_data or 'estimated_time' not in json_formatted_data:
+        return bad_request('Error: Missing Fields')
+
     title = request.json['title']
     type = request.json['type']
     location = request.json['location']
     estimated_time = request.json['estimated_time']
     description = request.json['description']
-    user_id = request.json['user_id']
 
     new_opportunity = Opportunity(title, type, location, estimated_time, description, user_id)
 
     db.session.add(new_opportunity)
     db.session.commit()
 
-    return opportunity_schema.jsonify(new_opportunity)
+    return opportunity_schema.jsonify(new_opportunity), 201
+
+#Get all opportunities
+@app.route('/opportunities', methods=['GET'])
+def get_all_opportunities():
+    all_opportunities = Opportunity.query.all()
+    result = opportunities_schema.dump(all_opportunities)
+    return jsonify(result), 200
+
+# Get all opportunities for one user
+# @app.route( '/users/<user_id>/opportunities>', methods=['GET'])
+# def get_opportunities(user_id):
+#     user = User.query.get(user_id)
+#     all_opportunities = user.opportunities
+#     result = opportunities_schema.dump(all_opportunities)
+#     return jsonify(result), 200
+
+# Get single opportunity for one user
+@app.route('/users/<user_id>/opportunity/<id>', methods=['GET'])
+def get_opportunity(user_id, id):
+    user = User.query.get(user_id)
+    opportunity = Opportunity.query.get(id)
+    return opportunity_schema.jsonify(opportunity), 200
+
+# Update a users opportunity
+@app.route('/users/<user_id>/opportunity/<id>', methods=['PUT'])
+def update_opporutnity(user_id, id):
+    user = User.query.get(user_id)
+    opportunity = Opportunity.query.get(id)
+    title = request.json['title']
+    type = request.json['type']
+    location = request.json['location']
+    estimated_time = request.json['estimated_time']
+    description = request.json['description']
+
+    opportunity.title = title
+    opportunity.type = type
+    opportunity.location = location
+    opportunity.estimated_time = estimated_time
+    opportunity.description = description
+    opportunity.user_id = user_id
+
+    db.session.commit()
+
+    return opportunity_schema.jsonify(opportunity), 200
+
+#Delete opportunity for user
+@app.route('/users/<user_id>/opportunity/<id>', methods=['DELETE'])
+def delete_opportunity(user_id, id):
+    user = User.query.get(user_id)
+    opportunity = Opportunity.query.get(id)
+    db.session.delete(opportunity)
+    db.session.commit()
+    return opportunities_schema.jsonify(opportunities), 204
 
 
 # run server
