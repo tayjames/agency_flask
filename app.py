@@ -149,8 +149,10 @@ def delete_user(id):
 # Create an Opportunity
 @app.route('/users/<user_id>/opportunity', methods=['POST'])
 def create_opportunity(user_id):
-    data = request.get_json()
-    if 'title' not in data or 'location' not in data or 'type' not in data or 'description' not in data or 'estimated_time' not in data:
+    data = request.data
+    json_formatted_data = json.loads(data)
+
+    if 'title' not in json_formatted_data or 'location' not in json_formatted_data or 'type' not in json_formatted_data or 'description' not in json_formatted_data or 'estimated_time' not in json_formatted_data:
         return bad_request('Error: Missing Fields')
 
     title = request.json['title']
@@ -166,6 +168,14 @@ def create_opportunity(user_id):
 
     return opportunity_schema.jsonify(new_opportunity), 201
 
+
+#Get all opportunities
+@app.route('/opportunities', methods=['GET'])
+def get_all_opportunities():
+    all_opportunities = Opportunity.query.all()
+    result = opportunities_schema.dump(all_opportunities)
+    return jsonify(result), 200
+  
 # Get all opportunities for one user
 # @app.route( '/users/<user_id>/opportunities>', methods=['GET'])
 # def get_opportunities(user_id):
