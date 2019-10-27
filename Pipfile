@@ -13,6 +13,9 @@ marshmallow-sqlalchemy = "*"
 bcrypt = "*"
 flask-migrate = "*"
 alembic = "*"
+ipdb = "*"
+marshmallow = "*"
+flask-cors = "*"
 
 [requires]
 python_version = "3.8"
