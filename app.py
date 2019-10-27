@@ -8,7 +8,7 @@ from errors import bad_request
 import os
 import bcrypt
 import logging
-import json 
+import json
 
 # init app
 app = Flask(__name__)
@@ -33,14 +33,16 @@ class User(db.Model):
     email = db.Column(db.String(100), unique=True)
     password = db.Column(db.String(100))
     phone_number= db.Column(db.Integer)
+    role = db.Column(db.String(100))
     opportunities = db.relationship('Opportunity', backref='client')
 
-    def __init__(self, first_name, last_name, email, password, phone_number):
+    def __init__(self, first_name, last_name, email, password, phone_number, role):
         self.first_name = first_name
         self.last_name = last_name
         self.email = email
         self.password = password
         self.phone_number = phone_number
+        self.role = role
 
 class Opportunity(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -63,7 +65,7 @@ class Opportunity(db.Model):
 # USER Schemas
 class UserSchema(ma.Schema):
     class Meta:
-        fields = ('id', 'first_name', 'last_name', 'email', 'password', 'phone_number')
+        fields = ('id', 'first_name', 'last_name', 'email', 'password', 'phone_number', 'role')
 
 # OPPORTUNITY Schemas
 class OpportunitySchema(ma.Schema):
@@ -81,19 +83,20 @@ opportunities_schema = OpportunitySchema(many=True)
 def create_user():
     data = request.data
     json_formatted_data = json.loads(data)
-  
-    if 'first_name' not in json_formatted_data or 'last_name' not in json_formatted_data or 'email' not in json_formatted_data or 'password' not in json_formatted_data or 'phone_number' not in json_formatted_data:
+
+    if 'first_name' not in json_formatted_data or 'last_name' not in json_formatted_data or 'email' not in json_formatted_data or 'password' not in json_formatted_data or 'phone_number' not in json_formatted_data or 'role' not in json_formatted_data:
         return bad_request('Error: Missing Fields')
     if User.query.filter_by(email=json_formatted_data['email']).first():
         return bad_request('That email is in use, please pick another.')
-    
+
     first_name = json_formatted_data['first_name']
     last_name = json_formatted_data['last_name']
     email = json_formatted_data['email']
     password = bcrypt.hashpw(json_formatted_data['password'].encode('utf8'), bcrypt.gensalt())
     phone_number = json_formatted_data['phone_number']
+    role = json_formatted_data['role']
 
-    new_user = User(first_name, last_name, email, password, phone_number)
+    new_user = User(first_name, last_name, email, password, phone_number, role)
 
     db.session.add(new_user)
     db.session.commit()
