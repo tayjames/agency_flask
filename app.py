@@ -35,6 +35,7 @@ class User(db.Model):
     phone_number= db.Column(db.Integer)
     role = db.Column(db.String(100))
     opportunities = db.relationship('Opportunity', backref='client')
+    reservations = db.relationship('VolunteerOpportunity', backref='volunteer')
 
     def __init__(self, first_name, last_name, email, password, phone_number, role):
         self.first_name = first_name
@@ -51,6 +52,8 @@ class Opportunity(db.Model):
     location = db.Column(db.String(120), index=True)
     estimated_time = db.Column(db.String(120), index=True)
     description = db.Column(db.String(140), index=True)
+    fulfilled = db.Column(db.Boolean, index=True, default=False)
+    reservations = db.relationship('VolunteerOpportunity', backref='reservation')
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
@@ -62,6 +65,15 @@ class Opportunity(db.Model):
         self.description = description
         self.user_id = user_id
 
+class VolunteerOpportunity(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    opportunity_id = db.Column(db.Integer, db.ForeignKey('opportunity.id'))
+    volunteer_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+
+    def __init__(self, opportunity_id, volunteer_id):
+        self.opportunity_id = opportunity_id
+        self.volunteer_id = volunteer_id
+
 # USER Schemas
 class UserSchema(ma.Schema):
     class Meta:
@@ -70,13 +82,20 @@ class UserSchema(ma.Schema):
 # OPPORTUNITY Schemas
 class OpportunitySchema(ma.Schema):
     class Meta:
-        fields = ('id', 'title', 'type', 'location', 'estimated_time', 'description', 'user_id')
+        fields = ('id', 'title', 'type', 'location', 'estimated_time', 'description', 'fulfilled', 'user_id')
+
+# VOLUNTEER OPPORTUNITIES Schemas
+class VolunteerOpportunitySchema(ma.Schema):
+    class Meta:
+        fields = ('id', 'opportunity_id', 'volunteer_id')
 
 # Init Schema
 user_schema = UserSchema()
 users_schema = UserSchema(many=True)
 opportunity_schema = OpportunitySchema()
 opportunities_schema = OpportunitySchema(many=True)
+volunteer_opportunity_schema = VolunteerOpportunitySchema()
+volunteer_opportunities_schema = VolunteerOpportunitySchema(many=True)
 
 #create a User
 @app.route('/user', methods=['POST'])
@@ -175,14 +194,14 @@ def get_all_opportunities():
     all_opportunities = Opportunity.query.all()
     result = opportunities_schema.dump(all_opportunities)
     return jsonify(result), 200
-  
+
 # Get all opportunities for one user
-# @app.route( '/users/<user_id>/opportunities>', methods=['GET'])
-# def get_opportunities(user_id):
-#     user = User.query.get(user_id)
-#     all_opportunities = user.opportunities
-#     result = opportunities_schema.dump(all_opportunities)
-#     return jsonify(result), 200
+@app.route('/users/<user_id>/opportunity', methods=['GET'])
+def get_opportunities(user_id):
+    user = User.query.get(user_id)
+    all_opportunities = user.opportunities
+    result = opportunities_schema.dump(all_opportunities)
+    return jsonify(result), 200
 
 # Get single opportunity for one user
 @app.route('/users/<user_id>/opportunity/<id>', methods=['GET'])
@@ -220,7 +239,29 @@ def delete_opportunity(user_id, id):
     opportunity = Opportunity.query.get(id)
     db.session.delete(opportunity)
     db.session.commit()
-    return opportunities_schema.jsonify(opportunities), 204
+    all_opportunities = Opportunity.query.all()
+    return opportunities_schema.jsonify(all_opportunities), 204
+
+@app.route('/users/<volunteer_id>/opportunities')
+#index of all opps available to volunteers
+def get_volunteer_opportunities():
+    pass
+
+@app.route('/users/<volunteer_id>/opportunities/<id>')
+#show page for a specific opp
+
+@app.route('/users/<volunteer_id>/opportunities/<opportunity_id>', methods=['POST'])
+#post request here when button is clicked
+def create_reservation(volunteer_id, opportunity_id):
+    new_reservation = VolunteerOpportunity(opportunity_id, volunteer_id)
+
+    opportunity = Opportunity.query.get(opportunity_id)
+    opportunity.fulfilled = True
+
+    db.session.add(new_reservation)
+    db.session.commit()
+
+    return volunteer_opportunity_schema.jsonify(new_reservation), 201
 
 
 # run server
