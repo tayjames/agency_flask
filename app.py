@@ -264,6 +264,21 @@ def create_reservation(volunteer_id, opportunity_id):
     return volunteer_opportunity_schema.jsonify(new_reservation), 201
 
 
+#User Login
+@app.route('/login', methods=['POST'])
+def user_login():
+    data = request.data
+    json_formatted_data = json.loads(data)
+    user = User.query.filter_by(email=json_formatted_data['email']).first()
+    if user:
+        if bcrypt.checkpw(json_formatted_data['password'].encode('utf8'), user.password):
+            return user_schema.jsonify(user), 200
+        else:
+            "Error: incorrect password"
+    else:
+        return "Email not found."
+
+
 # run server
 if __name__ == '__main__':
     app.run(debug=True)
