@@ -37,3 +37,6 @@ pipenv install flask
 pipenv install flask-sqlalchemy
 pipenv install flask-marshmallow
 pipenv install marshmallow-sqlalchemy
+
+
+Adding this to file for pip
