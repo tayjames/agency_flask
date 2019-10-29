@@ -83,3 +83,12 @@ Framework: Flask
 Dependencies:
 SQLAlchemy--sql
 Flask-migrate
+
+
+
+### Core Contributors:
+
+* [Tay James](https://github.com/tayjames)
+* [Greg Anderson](https://github.com/gregoryanderson)
+* [Aiden McKay](https://github.com/JellyBeans1312)
+* [Mills Provosty](https://github.com/MillsProvosty)
