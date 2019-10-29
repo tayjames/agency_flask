@@ -1,19 +1,24 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from flask_migrate import Migrate
 from flask_cors import CORS
 from datetime import datetime
 from errors import bad_request
+from flask.ext.heroku import Heroku
 import os
 import bcrypt
 import logging
 import json
 
+
 # init app
 app = Flask(__name__)
 CORS(app, resources=r'*', headers='Content-Type')
 basedir = os.path.abspath(os.path.dirname(__file__))
+
+#heroku
+heroku = Heroku(app)
 
 # database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'db.sqlite')
