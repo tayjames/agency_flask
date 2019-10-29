@@ -6,3 +6,5 @@ install:
 deploy:
   provider: heroku
   app: the-agency-app
+script:
+  
