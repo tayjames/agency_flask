@@ -26,13 +26,55 @@ $ migrate the db by running ```flask db migrate``` then ```flask db upgrade```.
 $ To reverse any migrations, use ``` flask db downgrade```.
 
 
+### Run Locally
+* Run ```flask run```
+* Open a window to http://localhost:5000 or postman and enter an endpoint
+
 ### Run Tests
+<coming soon!>
 
 ### Helpful Code
 to pry: ``` import ipdb; ipdb.set_trace()```
 
+### User Endpoints
 
+* Create a User
+```POST https://the-agency-app.herokuapp.com/user ```
 
+* Update User Information
+```PUT https://the-agency-app.herokuapp.com/users/<user_id>  ```
+
+* Show All Users
+```GET https://the-agency-app.herokuapp.com/users ```
+
+* Show Single User
+```GET https://the-agency-app.herokuapp.com/user/<user_id>  ```
+
+* Delete a User
+```DELETE https://the-agency-app.herokuapp.com/<user_id>  ```
+
+* User Login
+``` POST https://the-agency-app.herokuapp.com/login ```
+
+### Opportunity Endpoints
+
+* Create an Opportunity
+```POST https://the-agency-app.herokuapp.com/users/<user_id>/opportunity  ```
+
+* Update an Opportunity
+```PUT https://the-agency-app.herokuapp.com/users/<user_id>/opportunity/<opportunity_id>  ```
+
+* Show All Opportunities
+```GET https://the-agency-app.herokuapp.com/opportunities  ```
+
+* Show Single Opportunity for one User
+```GET https://the-agency-app.herokuapp.com/users/<user_id>/opportunity/<opportunity_id>  ```
+
+* Delete an Opportunity
+```DELETE https://the-agency-app.herokuapp.com/users/<user_id>/opportunity/<opportunity_id>  ```
+
+### Opportunity Reservation Endpoint
+```POST https://the-agency-app.herokuapp.com/users/<volunteer_id>/opportunities/<opportunity_id>```
 
 ### Tech Stack
 Language: Python v3.8.0
