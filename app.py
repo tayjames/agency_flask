@@ -5,7 +5,7 @@ from flask_migrate import Migrate
 from flask_cors import CORS
 from datetime import datetime
 from errors import bad_request
-from heroku import Heroku
+from flask_heroku import Heroku
 import os
 import bcrypt
 import logging
