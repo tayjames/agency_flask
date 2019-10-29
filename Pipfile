@@ -16,6 +16,8 @@ alembic = "*"
 ipdb = "*"
 marshmallow = "*"
 flask-cors = "*"
+gunicorn = "*"
+flask-heroku = "*"
 
 [requires]
 python_version = "3.8"
