@@ -4,6 +4,7 @@ Agency was a 4 person, 13 day project built to connect clients with physical lim
 
 
 [Backend](https://git.heroku.com/the-agency-app.git)
+
 [Frontend]()
 
 ### Schema
@@ -11,19 +12,32 @@ Agency was a 4 person, 13 day project built to connect clients with physical lim
 
 ### Initial Setup
 $ git clone git@github.com:tayjames/agency_flask.git
+
 $ cd agency_flask
+
 $ install python3
+
 $ pip3 install pipenv
+
 $ pipenv shell
+
 $ pipenv install flask
+
 $ pipenv install flask-sqlalchemy
+
 $ pipenv install flask-marshmallow
+
 $ pipenv install marshmallow-sqlalchemy
+
 $ pipenv install flask_migrate
+
 $ pipenv install alembic
+
 $ create the migration repository for microblog by running ```flask db init```
-$ migrate the db by running ```flask db migrate``` then ```flask db upgrade```.
-$ To reverse any migrations, use ``` flask db downgrade```.
+
+$ migrate the db by running ```flask db migrate``` then ```flask db upgrade```
+
+$ To reverse any migrations, use ``` flask db downgrade```
 
 
 ### Run Locally
@@ -74,7 +88,7 @@ to pry: ``` import ipdb; ipdb.set_trace()```
 ```DELETE https://the-agency-app.herokuapp.com/users/<user_id>/opportunity/<opportunity_id>  ```
 
 ### Opportunity Reservation Endpoint
-```POST https://the-agency-app.herokuapp.com/users/<volunteer_id>/opportunities/<opportunity_id>```
+* ```POST https://the-agency-app.herokuapp.com/users/<volunteer_id>/opportunities/<opportunity_id>```
 
 ### Tech Stack
 Language: Python v3.8.0
