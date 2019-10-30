@@ -10,6 +10,7 @@ import os
 import bcrypt
 import logging
 import json
+import requests
 
 
 # init app
@@ -259,6 +260,15 @@ def get_volunteer_opportunities():
 #post request here when button is clicked
 def create_reservation(volunteer_id, opportunity_id):
     new_reservation = VolunteerOpportunity(opportunity_id, volunteer_id)
+    volunteer = User.query.get(volunteer_id)
+    # import ipdb; ipdb.set_trace()
+    vol_phone = volunteer.phone_number
+    params = {
+        'to': vol_phone
+      }
+    r = requests.post(
+        'https://bf83a03f.ngrok.io/twilio',
+        params=params)
 
     opportunity = Opportunity.query.get(opportunity_id)
     opportunity.fulfilled = True
