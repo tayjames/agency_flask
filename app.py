@@ -5,7 +5,7 @@ from flask_migrate import Migrate
 from flask_cors import CORS
 from datetime import datetime
 from errors import bad_request
-from flask_heroku import Heroku
+# from flask_heroku import Heroku
 import os
 import bcrypt
 import logging
@@ -18,7 +18,7 @@ CORS(app, resources=r'*', headers='Content-Type')
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 #heroku
-heroku = Heroku(app)
+# heroku = Heroku(app)
 
 # database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'db.sqlite')
@@ -40,7 +40,7 @@ class User(db.Model):
     phone_number= db.Column(db.Integer)
     role = db.Column(db.String(100))
     opportunities = db.relationship('Opportunity', backref='client')
-    reservations = db.relationship('VolunteerOpportunity', backref='volunteer')
+    reservations = db.relationship('VolunteerOpportunity', backref=db.backref('volunteer', uselist=False))
 
     def __init__(self, first_name, last_name, email, password, phone_number, role):
         self.first_name = first_name
@@ -258,12 +258,12 @@ def delete_opportunity(user_id, id):
     all_opportunities = Opportunity.query.all()
     return opportunities_schema.jsonify(all_opportunities), 204
 
-@app.route('/users/<volunteer_id>/opportunities')
+# @app.route('/users/<volunteer_id>/opportunities')
 #index of all opps available to volunteers
-def get_volunteer_opportunities():
-    pass
+# def get_volunteer_opportunities():
+#     pass
 
-@app.route('/users/<volunteer_id>/opportunities/<id>')
+# @app.route('/users/<volunteer_id>/opportunities/<id>')
 #show page for a specific opp
 
 @app.route('/users/<volunteer_id>/opportunities/<opportunity_id>', methods=['POST'])
@@ -278,6 +278,13 @@ def create_reservation(volunteer_id, opportunity_id):
     db.session.commit()
 
     return volunteer_opportunity_schema.jsonify(new_reservation), 201
+
+@app.route('/users/<volunteer_id>/opportunities', methods=['GET'])
+def get_reserved_opps(volunteer_id):
+    volunteer = User.query.get(volunteer_id)
+    reservations = volunteer.reservations
+    result = volunteer_opportunities_schema.dump(reservations)
+    return jsonify(result), 200
 
 
 #User Login
