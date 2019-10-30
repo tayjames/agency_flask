@@ -261,7 +261,6 @@ def get_volunteer_opportunities():
 def create_reservation(volunteer_id, opportunity_id):
     new_reservation = VolunteerOpportunity(opportunity_id, volunteer_id)
     volunteer = User.query.get(volunteer_id)
-    # import ipdb; ipdb.set_trace()
     vol_phone = volunteer.phone_number
     params = { 'to': vol_phone }
     r = requests.post('https://695694f9.ngrok.io/twilio', data=json.dumps(params))
