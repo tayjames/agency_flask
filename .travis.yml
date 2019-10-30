@@ -7,4 +7,4 @@ deploy:
   provider: heroku
   app: the-agency-app
 script:
-  - python test_app.py
+  - python -m unittest
