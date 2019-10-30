@@ -134,26 +134,37 @@ def get_users():
 @app.route('/users/<id>', methods=['GET'])
 def get_user(id):
     user = User.query.get(id)
-    return user_schema.jsonify(user), 200
+    if user:
+        return user_schema.jsonify(user), 200
+    else:
+        return bad_request("User does not exist")
 
 # Update a user
 @app.route('/users/<id>', methods=['PUT'])
 def update_user(id):
     user = User.query.get(id)
+    data = request.data
+    json_formatted_data = json.loads(data)
 
-    first_name = request.json['first_name']
-    last_name = request.json['last_name']
-    email = request.json['email']
-    phone_number = request.json['phone_number']
+    if 'first_name' not in json_formatted_data or 'last_name' not in json_formatted_data or 'email' not in json_formatted_data or 'password' not in json_formatted_data or 'phone_number' not in json_formatted_data:
+        return bad_request('Error: Missing Fields')
+
+    # import ipdb; ipdb.set_trace()
+    first_name = json_formatted_data['first_name']
+    last_name = json_formatted_data['last_name']
+    email = json_formatted_data['email']
+    password = json_formatted_data['password']
+    phone_number = json_formatted_data['phone_number']
 
     user.first_name = first_name
     user.last_name = last_name
     user.email = email
+    user.password = password
     user.phone_number = phone_number
 
     db.session.commit()
 
-    return user_schema.jsonify(user), 200
+    return user_schema.jsonify(user), 204
 
 # Delete single user
 @app.route('/users/<id>', methods=['DELETE'])
