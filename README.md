@@ -13,7 +13,7 @@ Agency was a 4 person, 13 day project built to connect clients with physical lim
 ### Initial Setup
 * $ git clone git@github.com:tayjames/agency_flask.git   
 * $ cd agency_flask   
-* $ install python3   
+* $ install python3 from python.org  
 * $ pip3 install pipenv   
 * $ pipenv shell   
 * $ pipenv install flask   
