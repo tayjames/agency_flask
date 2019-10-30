@@ -5,7 +5,7 @@ from flask_migrate import Migrate
 from flask_cors import CORS
 from datetime import datetime
 from errors import bad_request
-from flask_heroku import Heroku
+# from flask_heroku import Heroku
 import os
 import bcrypt
 import logging
@@ -19,7 +19,7 @@ CORS(app, resources=r'*', headers='Content-Type')
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 #heroku
-heroku = Heroku(app)
+# heroku = Heroku(app)
 
 # database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'db.sqlite')
@@ -41,7 +41,7 @@ class User(db.Model):
     phone_number= db.Column(db.Integer)
     role = db.Column(db.String(100))
     opportunities = db.relationship('Opportunity', backref='client')
-    reservations = db.relationship('VolunteerOpportunity', backref='volunteer')
+    reservations = db.relationship('VolunteerOpportunity', backref=db.backref('volunteer', uselist=False))
 
     def __init__(self, first_name, last_name, email, password, phone_number, role):
         self.first_name = first_name
@@ -140,26 +140,37 @@ def get_users():
 @app.route('/users/<id>', methods=['GET'])
 def get_user(id):
     user = User.query.get(id)
-    return user_schema.jsonify(user), 200
+    if user:
+        return user_schema.jsonify(user), 200
+    else:
+        return bad_request("User does not exist")
 
 # Update a user
 @app.route('/users/<id>', methods=['PUT'])
 def update_user(id):
     user = User.query.get(id)
+    data = request.data
+    json_formatted_data = json.loads(data)
 
-    first_name = request.json['first_name']
-    last_name = request.json['last_name']
-    email = request.json['email']
-    phone_number = request.json['phone_number']
+    if 'first_name' not in json_formatted_data or 'last_name' not in json_formatted_data or 'email' not in json_formatted_data or 'password' not in json_formatted_data or 'phone_number' not in json_formatted_data:
+        return bad_request('Error: Missing Fields')
+
+    # import ipdb; ipdb.set_trace()
+    first_name = json_formatted_data['first_name']
+    last_name = json_formatted_data['last_name']
+    email = json_formatted_data['email']
+    password = json_formatted_data['password']
+    phone_number = json_formatted_data['phone_number']
 
     user.first_name = first_name
     user.last_name = last_name
     user.email = email
+    user.password = password
     user.phone_number = phone_number
 
     db.session.commit()
 
-    return user_schema.jsonify(user), 200
+    return user_schema.jsonify(user), 204
 
 # Delete single user
 @app.route('/users/<id>', methods=['DELETE'])
@@ -248,12 +259,12 @@ def delete_opportunity(user_id, id):
     all_opportunities = Opportunity.query.all()
     return opportunities_schema.jsonify(all_opportunities), 204
 
-@app.route('/users/<volunteer_id>/opportunities')
+# @app.route('/users/<volunteer_id>/opportunities')
 #index of all opps available to volunteers
-def get_volunteer_opportunities():
-    pass
+# def get_volunteer_opportunities():
+#     pass
 
-@app.route('/users/<volunteer_id>/opportunities/<id>')
+# @app.route('/users/<volunteer_id>/opportunities/<id>')
 #show page for a specific opp
 
 @app.route('/users/<volunteer_id>/opportunities/<opportunity_id>', methods=['POST'])
@@ -272,6 +283,13 @@ def create_reservation(volunteer_id, opportunity_id):
     db.session.commit()
 
     return volunteer_opportunity_schema.jsonify(new_reservation), 201
+
+@app.route('/users/<volunteer_id>/opportunities', methods=['GET'])
+def get_reserved_opps(volunteer_id):
+    volunteer = User.query.get(volunteer_id)
+    reservations = volunteer.reservations
+    result = volunteer_opportunities_schema.dump(reservations)
+    return jsonify(result), 200
 
 
 #User Login
