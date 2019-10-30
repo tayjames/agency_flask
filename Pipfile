@@ -18,6 +18,7 @@ marshmallow = "*"
 flask-cors = "*"
 gunicorn = "*"
 flask-heroku = "*"
+requests = "*"
 
 [requires]
 python_version = "3.8"
