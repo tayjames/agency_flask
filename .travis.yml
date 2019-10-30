@@ -1,0 +1,10 @@
+language: python
+python:
+  - "3.8"
+install:
+  - pip install -r requirements.txt
+deploy:
+  provider: heroku
+  app: the-agency-app
+script:
+  

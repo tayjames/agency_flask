@@ -17,6 +17,8 @@ ipdb = "*"
 marshmallow = "*"
 flask-cors = "*"
 coverage = "*"
+gunicorn = "*"
+flask-heroku = "*"
 
 [requires]
 python_version = "3.8"
