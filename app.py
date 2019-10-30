@@ -10,6 +10,7 @@ import os
 import bcrypt
 import logging
 import json
+import requests
 
 
 # init app
@@ -270,6 +271,10 @@ def delete_opportunity(user_id, id):
 #post request here when button is clicked
 def create_reservation(volunteer_id, opportunity_id):
     new_reservation = VolunteerOpportunity(opportunity_id, volunteer_id)
+    volunteer = User.query.get(volunteer_id)
+    vol_phone = volunteer.phone_number
+    params = { 'to': vol_phone }
+    r = requests.post('https://695694f9.ngrok.io/twilio', data=json.dumps(params))
 
     opportunity = Opportunity.query.get(opportunity_id)
     opportunity.fulfilled = True
@@ -300,6 +305,7 @@ def user_login():
             "Error: incorrect password"
     else:
         return "Email not found."
+
 
 
 # run server
