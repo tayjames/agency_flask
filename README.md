@@ -219,7 +219,7 @@ GET https://the-agency-app.herokuapp.com/users/<user_id>/opportunity/<opportunit
 ```
 
 ### Opportunity Reservation Endpoint
-* ```
+ ```
 
 POST https://theagencyapp.herokuapp.com/users/<volunteer_id>/opportunities/<opportunity_id>
 
