@@ -19,7 +19,14 @@ Agency was a 4 person, 13 day project built to connect clients with physical lim
 * $ pipenv install alembic   
 * $ create the migration repository for microblog by running ```flask db init```     
 * $ migrate the db by running ```flask db migrate``` then ```flask db upgrade```     
-* $ To reverse any migrations, use ``` flask db downgrade```     
+* $ To reverse any migrations, use ``` flask db downgrade```
+
+### Clone 
+```
+git clone git@github.com:tayjames/agency_flask.git
+cd agency_flask
+python setup.py install to install dependencies
+```
 
 
 ### Run Locally
@@ -27,7 +34,7 @@ Agency was a 4 person, 13 day project built to connect clients with physical lim
 * Open a window to http://localhost:5000 or postman and enter an endpoint
 
 ### Run Tests
-<coming soon!>
+` python -m unittest `
 
 ### Helpful Code
 to pry: ``` import ipdb; ipdb.set_trace()```
