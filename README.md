@@ -2,11 +2,6 @@
 
 Agency was a 4 person, 13 day project built to connect clients with physical limitations with volunteers willing to help out. Users choose whether or not they are a client or a volunteer, and upon account creation have the ability to either pick up volunteer opportunities, or create them. Users and Opportunities have full CRUD functionality. Take a look below to see the endpoints you can access and examples of successful requests and responses.
 
-
-[Backend](https://git.heroku.com/the-agency-app.git)
-
-[Frontend]()
-
 ### Schema
 ![Schema](/images/schema.png)
 
