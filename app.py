@@ -152,20 +152,18 @@ def update_user(id):
     data = request.data
     json_formatted_data = json.loads(data)
 
-    if 'first_name' not in json_formatted_data or 'last_name' not in json_formatted_data or 'email' not in json_formatted_data or 'password' not in json_formatted_data or 'phone_number' not in json_formatted_data:
+    if 'first_name' not in json_formatted_data or 'last_name' not in json_formatted_data or 'email' not in json_formatted_data or 'phone_number' not in json_formatted_data:
         return bad_request('Error: Missing Fields')
 
     # import ipdb; ipdb.set_trace()
     first_name = json_formatted_data['first_name']
     last_name = json_formatted_data['last_name']
     email = json_formatted_data['email']
-    password = json_formatted_data['password']
     phone_number = json_formatted_data['phone_number']
 
     user.first_name = first_name
     user.last_name = last_name
     user.email = email
-    user.password = password
     user.phone_number = phone_number
 
     db.session.commit()
